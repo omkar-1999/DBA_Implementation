@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ShareDeployment from '@/components/ShareDeployment.vue'
+import api from '@/services/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,8 +14,13 @@ const sharedUsers = ref([])
 const sharedTeams = ref([])
 
 onMounted(async () => {
-  availableUsers.value = await fetch('https://localhost:7260/api/users').then((r) => r.json())
-  availableTeams.value = await fetch('https://localhost:7260/api/teams').then((r) => r.json())
+const [usersResponse, teamsResponse] = await Promise.all([
+  api.get('/users'),
+  api.get('/teams'),
+])
+
+availableUsers.value = usersResponse.data
+availableTeams.value = teamsResponse.data
 
   sharedUsers.value = JSON.parse(route.query.users || '[]')
   sharedTeams.value = JSON.parse(route.query.teams || '[]')
